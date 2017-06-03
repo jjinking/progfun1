@@ -96,21 +96,6 @@ object Anagrams {
     }
   }
 
-  // def comb[T](l: List[T]): List[List[T]] = l match {
-  //   case Nil => List(Nil)
-  //   case x::xs => {
-  //     val prevResult = comb(xs)
-  //     prevResult ++ prevResult.map(y => x::y)
-  //   }
-  // }
-
-  // def combinations(occurrences: Occurrences): List[Occurrences] = occurrences match {
-  //   case Nil => Nil
-  //   case (_, 0)::xs => combinations(xs)
-  //   case (c, n)::xs => List() ++ combinations((c, n-1)::xs) ++ combinations((c, n)::)
-
-  // }
-
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
    *  The precondition is that the occurrence list `y` is a subset of
@@ -121,7 +106,13 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = {
+    y.foldLeft(x.toMap) {
+      case (currStateMap, (c, n)) => {
+        currStateMap.updated(c: Char, currStateMap.get(c).get - n)
+      }
+    }.toList.filter({case (c, n) => n > 0}).sorted
+  }
 
   /** Returns a list of all anagram sentences of the given sentence.
    *
