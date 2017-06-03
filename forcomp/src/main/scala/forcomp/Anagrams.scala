@@ -154,5 +154,21 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
+    sentenceAnagramsAux(sentenceOccurrences(sentence), List(Nil))
+  }
+
+  def sentenceAnagramsAux(occurrences: Occurrences, soFar: List[Sentence]): List[Sentence] = occurrences match {
+    case Nil => soFar
+    case _ => {
+      for {
+        subOcc <- combinations(occurrences)  // for every subset of occurrences
+        if (dictionaryByOccurrences.contains(subOcc))  // if there are words made from that subset
+        w <- dictionaryByOccurrences.get(subOcc).get
+      } yield {
+        sentenceAnagramsAux(subtract(occurrences, subOcc), soFar.map(w::_))
+      }
+    }.flatten
+  }
+
 }
