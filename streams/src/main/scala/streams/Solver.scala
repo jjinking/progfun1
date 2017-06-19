@@ -10,7 +10,7 @@ trait Solver extends GameDef {
   /**
    * Returns `true` if the block `b` is at the final position
    */
-  def done(b: Block): Boolean = b.isStanding & b.b1.row == goal.row & b.b1.col == goal.col 
+  def done(b: Block): Boolean = b.isStanding && (b.b1.row == goal.row) && (b.b1.col == goal.col)
 
   /**
    * This function takes two arguments: the current block `b` and
@@ -68,18 +68,32 @@ trait Solver extends GameDef {
    * construct the correctly sorted stream.
    */
   def from(initial: Stream[(Block, List[Move])],
-           explored: Set[Block]): Stream[(Block, List[Move])] = 
+           explored: Set[Block]): Stream[(Block, List[Move])] = initial match {
+    case Stream.Empty => Stream.empty
+    case _ => {
+      val moreQ = initial.flatMap(
+        {case (b, h) => newNeighborsOnly(neighborsWithHistory(b, h), explored)}
+      )
+      val updatedExplored = explored ++ initial.map(_._1).toSet
+      initial #::: from(moreQ, updatedExplored)
+    }
+  }
 
   /**
    * The stream of all paths that begin at the starting block.
    */
-  lazy val pathsFromStart: Stream[(Block, List[Move])] = ???
+  lazy val pathsFromStart: Stream[(Block, List[Move])] = {
+    val initial = (startBlock, Nil)  #:: Stream.empty
+    from(initial, Set.empty)
+  }
 
   /**
    * Returns a stream of all possible pairs of the goal block along
    * with the history how it was reached.
    */
-  lazy val pathsToGoal: Stream[(Block, List[Move])] = ???
+  lazy val pathsToGoal: Stream[(Block, List[Move])] = {
+    pathsFromStart.filter({case (b, ms) => done(b)})
+  }
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the
@@ -88,6 +102,6 @@ trait Solver extends GameDef {
    * Note: the `head` element of the returned list should represent
    * the first move that the player should perform from the starting
    * position.
-   */
-  lazy val solution: List[Move] = ???
+    */
+  lazy val solution: List[Move] = pathsToGoal.head._2.reverse
 }

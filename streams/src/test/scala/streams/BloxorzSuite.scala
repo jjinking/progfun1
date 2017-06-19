@@ -42,6 +42,46 @@ class BloxorzSuite extends FunSuite {
     val optsolution = List(Right, Right, Down, Right, Right, Right, Down)
   }
 
+  trait Level0 extends SolutionChecker {
+    val level =
+      """SooT"""
+
+    val optsolution = List(Right)
+  }
+
+  test("utility function - isStanding") {
+    new Level1 {
+      assert(Block(Pos(0, 0), Pos(0, 0)).isStanding)
+      assert(Block(Pos(1, 1), Pos(1, 1)).isStanding)
+      assert(Block(Pos(5, 3), Pos(5, 3)).isStanding)
+      assert(!Block(Pos(0, 0), Pos(1, 0)).isStanding)
+      assert(!Block(Pos(1, 1), Pos(2, 1)).isStanding)
+      assert(!Block(Pos(5, 3), Pos(6, 3)).isStanding)
+    }
+  }
+
+  test("utility functions - done") {
+    new Level0 {
+      assert(!done(Block(Pos(1, 1), Pos(1, 2))))
+      assert(done(Block(Pos(0, 3), Pos(0, 3))))
+      assert(done(Block(goal, goal)))
+    }
+
+    new Level1 {
+      assert(!done(Block(Pos(1, 1), Pos(1, 2))))
+      assert(done(Block(goal, goal)))
+    }
+  }
+
+  test("utility functions - legalNeighbors") {
+    new Level1 {
+      val b = Block(Pos(2, 4), Pos(3, 4))
+      assert(b.legalNeighbors == List(
+               (Block(Pos(2,3),Pos(3,3)),Left),
+               (Block(Pos(1,4),Pos(1,4)),Up),
+               (Block(Pos(2,5),Pos(3,5)),Right)))
+    }
+  }
 
 	test("terrain function level 1") {
     new Level1 {
@@ -64,6 +104,11 @@ class BloxorzSuite extends FunSuite {
     }
   }
 
+  test("optimal solution for level 0") {
+    new Level0 {
+      assert(solve(solution) == Block(goal, goal))
+    }
+  }
 
 	test("optimal solution for level 1") {
     new Level1 {
@@ -83,6 +128,12 @@ class BloxorzSuite extends FunSuite {
       assert(neighborsWithHistory(Block(Pos(1,1),Pos(1,1)), List(Left,Up)).toSet ==
                Set((Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
                    (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))))
+
+      assert(neighborsWithHistory(Block(Pos(2,4),Pos(3,4)), List(Left,Up)) ==
+               List(
+                 (Block(Pos(2,3),Pos(3,3)), List(Left, Left, Up)),
+                 (Block(Pos(1,4),Pos(1,4)),List(Up, Left, Up)),
+                 (Block(Pos(2,5),Pos(3,5)),List(Right, Left, Up))))
     }
   }
 
