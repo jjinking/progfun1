@@ -123,7 +123,43 @@ def upsweep[A](inp: Array[A], from: Int, to: Int, f: (A, A) => A): TreeResA[A] =
   }
 }
 
-TODO: downsweep[A]
-https://www.coursera.org/learn/parprog1/lecture/934xD/parallel-scan-prefix-sum-operation
-    21:33
+def downsweep[A](inp: Array[A],
+                 a0: A,
+                 f: (A, A) => A,
+                 t: TreeResA[A],
+                 out: Array[A]): Unit = t match {
+  case Leaf(from, to, res) =>
+    scanLeftSeg(inp, from, to, a0, f, out)
+  case Node(l, _, r) => {
+    val (_,_) = parallel(
+      downsweep(inp, a0, f, l, out),
+      downsweep(inp, f(a0, l.res), f, r, out)
+    )
+  }
+}
 
+def scanlLeftSeg[A](inp: Array[A],
+                    left: Int,
+                    right: Int,
+                    a0: A,
+                    f: (A. A) => A,
+                    out: Array[A]) = {
+  if (left < right) {
+    var i = left
+    var a = a0
+    while (i < right) {
+      a = f(a, inp(i))
+      i = i + 1
+      out(i) = a
+    }
+  }
+}
+
+def scanLeft[A](inp: Array[A],
+                a0: A,
+                f: (A, A) => A,
+                out: Array[A]) = {
+  val t = upsweep(inp, 0, inp.length, f)
+  downsweep(inp, a0, f, t, out)
+  out(0) = a0
+}
