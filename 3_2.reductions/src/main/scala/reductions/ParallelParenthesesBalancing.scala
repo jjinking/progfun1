@@ -18,9 +18,9 @@ object ParallelParenthesesBalancingRunner {
   ) withWarmer(new Warmer.Default)
 
   def main(args: Array[String]): Unit = {
-    val length = 100000000
+    val length = 1000
     val chars = new Array[Char](length)
-    val threshold = 10000
+    val threshold = 10
     val seqtime = standardConfig measure {
       seqResult = ParallelParenthesesBalancing.balance(chars)
     }
@@ -42,7 +42,7 @@ object ParallelParenthesesBalancing {
    */
   def balance(chars: Array[Char]): Boolean = {
     @tailrec
-    def isBalanced(chars: List[Char], level: Int): Boolean = {
+    def isBalanced(chars: Array[Char], level: Int): Boolean = {
       if (level < 0) false
       else if (chars.isEmpty) level == 0
       else if (chars.head == '(') isBalanced(chars.tail, level + 1)
@@ -56,15 +56,36 @@ object ParallelParenthesesBalancing {
    */
   def parBalance(chars: Array[Char], threshold: Int): Boolean = {
 
-    def traverse(idx: Int, until: Int, arg1: Int, arg2: Int) /*: ???*/ = {
-      ???
+    @tailrec
+    def traverse(idx: Int, until: Int, opening: Int, closing: Int): (Int, Int)  = {
+      if (idx >= until) {
+        (opening, closing)
+      } else if (chars(idx) == '(') {
+        traverse(idx + 1, until, opening + 1, closing)
+      } else if (chars(idx) == ')') {
+        if (opening > 0) {
+          // Close the parens that opened in this segment
+          traverse(idx + 1, until, opening - 1, closing)
+        } else {
+          traverse(idx + 1, until, opening, closing + 1)
+        }
+      } else {
+        // Not ( or )
+        traverse(idx + 1, until, opening, closing)
+      }
     }
 
-    def reduce(from: Int, until: Int) /*: ???*/ = {
-      ???
+    def reduce(from: Int, until: Int): (Int, Int) = {
+      if (until - from < threshold) {
+        traverse(from, until, 0, 0)
+      } else {
+        val mid = (from + until) / 2 
+        val ((open1, close1), (open2, close2)) = parallel(reduce(from, mid), reduce(mid, until))
+        if (open1 > close2) (open1 + open2 - close2, close1)
+        else (open2, close1 + close2 - open1)
+      }
     }
-
-    reduce(0, chars.length) == ???
+    reduce(0, chars.length) == (0, 0)
   }
 
   // For those who want more:
