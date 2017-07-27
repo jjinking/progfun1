@@ -138,12 +138,12 @@ def downsweep[A](inp: Array[A],
   }
 }
 
-def scanlLeftSeg[A](inp: Array[A],
-                    left: Int,
-                    right: Int,
-                    a0: A,
-                    f: (A. A) => A,
-                    out: Array[A]) = {
+def scanLeftSeg[A](inp: Array[A],
+                   left: Int,
+                   right: Int,
+                   a0: A,
+                   f: (A. A) => A,
+                   out: Array[A]) = {
   if (left < right) {
     var i = left
     var a = a0
