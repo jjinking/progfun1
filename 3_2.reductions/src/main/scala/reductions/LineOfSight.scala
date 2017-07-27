@@ -61,7 +61,7 @@ object LineOfSight {
       var idx: Int = startPos
       var curMax: Float = 0
       while (idx < endPos) {
-        curMax = max(curMax, input(idx) / max(0, idx))
+        curMax = max(curMax, input(idx) / max(1, idx))
         idx += 1
       }
       curMax
@@ -85,9 +85,15 @@ object LineOfSight {
     case true => Leaf(startPos, endPos, upsweepSequential(input, startPos, endPos))
     case false => {
       val mid = (startPos + endPos) / 2
-      val (tL, tR) = parallel(upsweep(input, startPos, mid, threshold),
-                              upsweep(input, mid, endPos, threshold))
-      Node(tL, tR)
+      if (mid > startPos && endPos > mid) {
+        val (tL, tR) = parallel(upsweep(input, startPos, mid, threshold),
+                                upsweep(input, mid, endPos, threshold))
+        Node(tL, tR)
+      } else if (mid > startPos) {
+        Leaf(startPos, endPos, upsweepSequential(input, startPos, mid))
+      } else {
+        Leaf(mid, endPos, upsweepSequential(input, mid, endPos))
+      }
     }
   }
 
